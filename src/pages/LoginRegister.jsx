@@ -1,8 +1,8 @@
 // Login and Register page
 // Users can login or create an account using Firebase
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, updateProfile } from 'firebase/auth'
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, updateProfile } from 'firebase/auth'
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'
 import { auth, db } from '../firebase'
 import { useAuth } from '../context/AuthContext'
@@ -16,12 +16,20 @@ function LoginRegister() {
   const [loading, setLoading] = useState(false)
 
   const navigate = useNavigate()
-  const { currentUser } = useAuth()
+  const { currentUser, loading: authLoading } = useAuth()
 
-  // If user is already logged in, redirect to home
-  if (currentUser) {
-    navigate('/home')
-    return null
+  useEffect(() => {
+    if (!authLoading && currentUser) {
+      navigate('/home')
+    }
+  }, [authLoading, currentUser, navigate])
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-gray-600">Checking authentication...</div>
+      </div>
+    )
   }
 
   // Handle registration

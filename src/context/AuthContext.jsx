@@ -23,30 +23,44 @@ export function AuthProvider({ children }) {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       console.log('Auth state changed:', user ? 'logged in' : 'not logged in')
 
-      if (user) {
-        // Get the user's profile from Firestore
-        const userDoc = await getDoc(doc(db, 'users', user.uid))
+      try {
+        if (user) {
+          // Get the user's profile from Firestore
+          const userDoc = await getDoc(doc(db, 'users', user.uid))
 
-        if (userDoc.exists()) {
-          // User profile exists
-          const userData = userDoc.data()
-          setCurrentUser({
-            uid: user.uid,
-            email: user.email,
-            ...userData
-          })
+          if (userDoc.exists()) {
+            // User profile exists
+            const userData = userDoc.data()
+            setCurrentUser({
+              uid: user.uid,
+              email: user.email,
+              ...userData
+            })
+          } else {
+            // User profile doesn't exist yet - use displayName from auth
+            setCurrentUser({
+              uid: user.uid,
+              email: user.email,
+              name: user.displayName || user.email?.split('@')[0] || 'User'
+            })
+          }
         } else {
-          // User profile doesn't exist yet - use displayName from auth
+          setCurrentUser(null)
+        }
+      } catch (err) {
+        console.error('Error fetching authenticated user profile:', err)
+        if (user) {
           setCurrentUser({
             uid: user.uid,
             email: user.email,
             name: user.displayName || user.email?.split('@')[0] || 'User'
           })
+        } else {
+          setCurrentUser(null)
         }
-      } else {
-        setCurrentUser(null)
+      } finally {
+        setLoading(false)
       }
-      setLoading(false)
     })
 
     // Clean up the subscription when component unmounts
