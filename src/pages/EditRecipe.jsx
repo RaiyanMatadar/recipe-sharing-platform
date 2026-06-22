@@ -3,8 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import ReactQuill from 'react-quill-new'
-//import 'react-quill/dist/quill.snow.css'
-import 'react-quill-new/dist/react-quill'
+import 'react-quill-new/dist/quill.snow.css'
 
 import { doc, getDoc, updateDoc } from 'firebase/firestore'
 import { db } from '../firebase'
